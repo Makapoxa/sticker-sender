@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require 'mechanize'
+
+names = []
+agent = Mechanize.new
+
+0.upto(122) do |i|
+  page = agent.get("https://chpic.su/en/stickers/?sortby=date&orderby=desc&page=#{i}")
+  hrefs = page.links_with(href: %r{\/en\/stickers\/})
+  hrefs = hrefs.reject { |url| url.href =~ %r{sortby} }.reject { |url| url.href =~ %r{search} }
+
+  names += hrefs.map { |url| url.href.split('/').last }
+end
+
+File.open('packs', 'w') do |f|
+  (names.uniq - ['stickers']).each do |name|
+    f.write(name + "\n")
+  end
+end
